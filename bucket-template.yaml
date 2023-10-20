@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  Public bucket example showing how to make Lambda function code publicly available
+  to the Lambda service only
+Resources:
+  CodeBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: fourtheorem-lambda-packages
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: 'true'
+        IgnorePublicAcls: 'true'
+        BlockPublicPolicy: 'false'
+        RestrictPublicBuckets: 'false'
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced  # No ACLs allowed
+      AccessControl: Private
+
+  CodeBucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref CodeBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowPublicAccessIfFromLambda
+            Effect: Allow
+            Principal:
+              AWS: '*'
+            Action:
+              - 's3:GetObject'
+            Resource: 'arn:aws:s3:::fourtheorem-lambda-packages/*'
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:CalledVia: lambda.amazonaws.com
+
+Outputs:
+  BucketName:
+    Description: "S3 Bucket where the Lambda code will be stored"
+    Value: !Ref CodeBucket
+

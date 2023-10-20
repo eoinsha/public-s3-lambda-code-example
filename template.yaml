@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  HelloWorldFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+
+  HelloWorldFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: HelloWorldFunction
+      Description: A sample Lambda function using Node.js 18.x runtime.
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Role: !GetAtt HelloWorldFunctionRole.Arn
+      Code:
+        S3Bucket: fourtheorem-lambda-packages
+        S3Key: code.zip
+
+Outputs:
+  LambdaFunctionARN:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt HelloWorldFunction.Arn
+
